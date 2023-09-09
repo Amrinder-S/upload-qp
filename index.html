@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Send Message and Upload File to Discord Webhook</title>
+    <title>Send Paper Information to Exam Branch</title>
     <style>
-                body {
+        body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
             margin: 0;
@@ -16,14 +16,21 @@
         }
 
         .container {
-            max-width: 400px;
+           /*max-width: 400px;*/
             margin: 0 auto;
             padding: 20px;
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
-
+		input {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+            margin-bottom: 10px;
+			padding: 10px;
+			flex-wrap: nowrap;
+        }
         input[type="file"] {
             margin-bottom: 10px;
         }
@@ -46,83 +53,138 @@
             cursor: pointer;
             border-radius: 3px;
         }
+    /* Hide the default "Choose File" text */
+    input[type="file"] {
+      display: none;
+    }
+
+    /* Style the custom label to look like a button */
+    .custom-file-label {
+      display: table;
+	  margin-bottom: 5px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }		
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Send a Message and Upload a File to Discord Webhook</h1>
-        <input type="file" id="fileInput" name="file">
-        <label for="messageInput">Message:</label>
-        <center><input type="text" id="messageInput" placeholder="Enter your message"></center>
-		<hr>
-         <center><button type="button" onclick="sendMessageWithFile()">Send Message and Upload File</button></center>
-        <div id="progressContainer">
+        <h1>Send Paper Information to Exam Branch</h1>
+		<center>
+        <input type="text" id="subjectCodeInput" placeholder="Subject Code">
+        <input type="text" id="paperIdInput" placeholder="Paper ID">
+        <input type="text" id="subjectTitleInput" placeholder="Subject Title">
+        <input type="text" id="paperSetterIdInput" placeholder="Paper Setter ID">
+
+  <label for="qp_pdf_file_input" class="custom-file-label" id="custom-label">Choose Question Paper PDF File</label>
+  <input type="file" id="qp_pdf_file_input" name="file" />
+  <!-- Custom file input for "qp_doc_file_input" -->
+  <label for="qp_doc_file_input" class="custom-file-label" id="doc-label">Choose Question Paper DOC File</label>
+  <input type="file" id="qp_doc_file_input" name="file" />
+
+  <!-- Custom file input for "qp_solution_file_input" -->
+  <label for="qp_solution_file_input" class="custom-file-label" id="solution-label">Choose Question Paper Solution File</label>
+  <input type="file" id="qp_solution_file_input" name="file" />
+
+  <!-- Custom file input for "qp_rubrics_file_input" -->
+  <label for="qp_rubrics_file_input" class="custom-file-label" id="rubrics-label">Choose Question Paper Rubrics File</label>
+  <input type="file" id="qp_rubrics_file_input" name="file" />		
+
+        <button type="button" onclick="sendPaperInfo()">Send Paper Information</button>
+		</center>
+        <div id="progressContainer" style="display: none;">
             <progress id="progressBar" max="100" value="0"></progress>
             <p id="progressText">Uploading...</p>
         </div>
     </div>
 </body>
 <script>
-    function sendMessageWithFile() {
+    function sendPaperInfo() {
         const webhookUrl = "https://discord.com/api/webhooks/1149704540191465582/ARGtdWvpiegGZRXOfaJKFW1YZrZV8CWaE80c9-BHk6ehef1hjb8-r-jl_JG-ZtV361hU";
-        const fileInput = document.getElementById("fileInput");
-        const file = fileInput.files[0];
-        const messageInput = document.getElementById("messageInput");
-        const message = messageInput.value.trim();
+        const subjectCodeInput = document.getElementById("subjectCodeInput").value.trim();
+        const paperIdInput = document.getElementById("paperIdInput").value.trim();
+        const subjectTitleInput = document.getElementById("subjectTitleInput").value.trim();
+        const paperSetterIdInput = document.getElementById("paperSetterIdInput").value.trim();
+        const qp_pdf_file_input = document.getElementById("qp_pdf_file_input");
+        const file = qp_pdf_file_input.files[0];
 
+        if (!subjectCodeInput || !paperIdInput || !subjectTitleInput || !paperSetterIdInput) {
+            alert("Please fill in all fields.");
+            return;
+        }
         if (!file) {
             alert("Please select a file to upload.");
             return;
         }
-
         if (file.size > 25 * 1024 * 1024) {
             alert("File size should be less than 25 MB.");
             return;
         }
+//!----------------------------------------------------------------------------------------------
+const csvContent = `Subject Code, Paper ID, Subject Title, Paper Setter ID\n${subjectCodeInput}, ${paperIdInput}, ${subjectTitleInput}, ${paperSetterIdInput}`;
+    const csvBlob = new Blob([csvContent], { type: "text/csv" });
 
-        if (!message) {
-            alert("Please enter a message.");
-            return;
+    // Create a FormData object and append both the CSV Blob and the selected file
+    const formData = new FormData();
+    formData.append("file", csvBlob, "paper_info.csv"); // CSV as a file
+    formData.append("file2", file, file.name); // The selected file
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                // Successful request
+                console.log("Response:", xhr.responseText);
+            } else {
+                // Error occurred
+                console.error("Request failed with code:", xhr.status);
+            }
+            document.getElementById("progressContainer").style.display = "none";
         }
+    };
 
-        const payload = {
-            content: message,
-        };
+    xhr.upload.addEventListener("progress", function (e) {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            const progressBar = document.getElementById("progressBar");
+            const progressText = document.getElementById("progressText");
 
-        const formData = new FormData();
-        formData.append("payload_json", JSON.stringify(payload));
-        formData.append("file", file);
+            progressBar.value = percentComplete;
+            progressText.innerText = `Uploading... ${percentComplete.toFixed(2)}%`;
+        }
+    });
 
-        const xhr = new XMLHttpRequest();
+    xhr.open("POST", webhookUrl, true);
+    xhr.send(formData);
 
-        xhr.upload.addEventListener("progress", function (e) {
-            if (e.lengthComputable) {
-                const percentComplete = (e.loaded / e.total) * 100;
-                const progressBar = document.getElementById("progressBar");
-                const progressText = document.getElementById("progressText");
-
-                progressBar.value = percentComplete;
-                progressText.innerText = `Uploading... ${percentComplete.toFixed(2)}%`;
-            }
-        });
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    // Successful request
-                    console.log("Response:", xhr.responseText);
-                } else {
-                    // Error occurred
-                    console.error("Request failed with code:", xhr.status);
-                }
-                document.getElementById("progressContainer").style.display = "none";
-            }
-        };
-
-        xhr.open("POST", webhookUrl, true);
-        xhr.send(formData);
-
-        document.getElementById("progressContainer").style.display = "block";
+//!----------------------------------------------------------------------------------------------
+document.getElementById("progressContainer").style.display = "block";
     }
+	
+//!----------------------------------Stuff to change the input labels-----------------------------
+const fileInputs = document.querySelectorAll('input[type="file"]');
+
+// Loop through each file input and add an event listener to it
+fileInputs.forEach(fileInput => {
+  fileInput.addEventListener('change', () => {
+    // Handle the selected file here
+    console.log(fileInput.files[0] ? fileInput.files[0].name : 'No file selected');
+    
+    // Get the custom label associated with this file input
+    const customLabel = document.querySelector(`label[for="${fileInput.id}"]`);
+    
+    if (customLabel) {
+      // Extract the file type from the label's text
+      const fileType = customLabel.textContent.match(/Choose (.+) File/);
+      
+      // Update the custom label with the selected file name and type
+      customLabel.textContent = fileInput.files[0] ? `Selected ${fileType[1]} File: ${fileInput.files[0].name}` : `Choose ${fileType[1]} File`;
+    }
+  });
+});
+
 </script>
 </html>
