@@ -109,6 +109,7 @@
         const paperSetterIdInput = document.getElementById("paperSetterIdInput").value.trim();
         const qp_pdf = document.getElementById("qp_pdf").files[0];
         const qp_doc = document.getElementById("qp_doc").files[0];
+        doc_ext = document.getElementById("qp_doc").value.split('.').pop();
         const qp_solution = document.getElementById("qp_solution").files[0];
         const qp_rubrics = document.getElementById("qp_rubrics").files[0];
 
@@ -134,7 +135,7 @@
     // Create a FormData object and append both the CSV Blob and the selected file
     const formData = new FormData();
     formData.append('payload_json', JSON.stringify(payload)); // Convert payload to JSON and add it as a field
-    formData.append("file", csvBlob, "paper_info.csv"); // CSV as a file
+    formData.append("file", csvBlob, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}.csv`); // CSV as a file
     formData.append("file1", qp_pdf, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_pdf.pdf`); // The selected file
     if(qp_doc) {formData.append("file2", qp_doc, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_doc.docx`);}
     if(qp_solution) {formData.append("file3", qp_solution, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_solution.pdf`);}
@@ -172,7 +173,7 @@
 //!----------------------------------------------------------------------------------------------
 document.getElementById("progressContainer").style.display = "block";
     }
-	
+
 //!----------------------------------Stuff to change the input labels-----------------------------
 const fileInputs = document.querySelectorAll('input[type="file"]');
 
