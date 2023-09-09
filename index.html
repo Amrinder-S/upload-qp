@@ -73,24 +73,26 @@
     <div class="container">
         <h1>Send Paper Information to Exam Branch</h1>
 		<center>
+        <input type="text" id="nameInput" placeholder="Your Name">
         <input type="text" id="subjectCodeInput" placeholder="Subject Code">
         <input type="text" id="paperIdInput" placeholder="Paper ID">
         <input type="text" id="subjectTitleInput" placeholder="Subject Title">
         <input type="text" id="paperSetterIdInput" placeholder="Paper Setter ID">
+        <input type="text" id="remarks" placeholder="remarks (optional)">
 
   <label for="qp_pdf" class="custom-file-label" id="custom-label">Choose Question Paper PDF File</label>
-  <input type="file" id="qp_pdf" name="file" />
+  <input type="file" accept=".pdf" id="qp_pdf" name="file" />
   <!-- Custom file input for "qp_doc" -->
   <label for="qp_doc" class="custom-file-label" id="doc-label">Choose Question Paper DOC File</label>
-  <input type="file" id="qp_doc" name="file" />
+  <input type="file" accept=".doc,.docx" id="qp_doc" name="file" />
 
   <!-- Custom file input for "qp_solution" -->
   <label for="qp_solution" class="custom-file-label" id="solution-label">Choose Question Paper Solution File</label>
-  <input type="file" id="qp_solution" name="file" />
+  <input type="file" accept=".pdf,.doc,.docx" id="qp_solution" name="file" />
 
   <!-- Custom file input for "qp_rubrics" -->
   <label for="qp_rubrics" class="custom-file-label" id="rubrics-label">Choose Question Paper Rubrics File</label>
-  <input type="file" id="qp_rubrics" name="file" />		
+  <input type="file" accept=".pdf,.doc,.docx" id="qp_rubrics" name="file" />		
 
         <button type="button" onclick="sendPaperInfo()">Send Paper Information</button>
 		</center>
@@ -102,18 +104,22 @@
 </body>
 <script>
     function sendPaperInfo() {
-        const webhookUrl = "https://discord.com/api/webhooks/1149704540191465582/ARGtdWvpiegGZRXOfaJKFW1YZrZV8CWaE80c9-BHk6ehef1hjb8-r-jl_JG-ZtV361hU";
+        const webhookUrl = "https://discord.com/api/webhooks/1150054467396440145/ow_fZjkPflcltw05CcKKcflCR6zjXnqAaAxihxni0kwRFFSCg_2m8EDmLCN5R7qrKf3Z";
+        const nameInput = document.getElementById("nameInput").value.trim();
         const subjectCodeInput = document.getElementById("subjectCodeInput").value.trim();
         const paperIdInput = document.getElementById("paperIdInput").value.trim();
         const subjectTitleInput = document.getElementById("subjectTitleInput").value.trim();
         const paperSetterIdInput = document.getElementById("paperSetterIdInput").value.trim();
+        const remarks = document.getElementById("remarks").value.trim();
         const qp_pdf = document.getElementById("qp_pdf").files[0];
         const qp_doc = document.getElementById("qp_doc").files[0];
         doc_ext = document.getElementById("qp_doc").value.split('.').pop();
         const qp_solution = document.getElementById("qp_solution").files[0];
+        solution_ext = document.getElementById("qp_solution").value.split('.').pop();
         const qp_rubrics = document.getElementById("qp_rubrics").files[0];
+        rubrics_ext = document.getElementById("qp_rubrics").value.split('.').pop();
 
-        if (!subjectCodeInput || !paperIdInput || !subjectTitleInput || !paperSetterIdInput) {
+        if (!nameInput || !subjectCodeInput || !paperIdInput || !subjectTitleInput || !paperSetterIdInput) {
             alert("Please fill in all fields.");
             return;
         }
@@ -126,8 +132,17 @@
             return;
         }
 //!----------------------------------------------------------------------------------------------
+    payloadContent = " "
+    if (remarks) {
+        payloadContent = `# -------------------------------------------------------------\n\`\`\`Subject Code: ${subjectCodeInput}, Paper ID: ${paperIdInput}, Subject Title: ${subjectTitleInput}, Paper Setter ID: ${paperSetterIdInput}\`\`\`\n\`\`\`diff\n-${remarks}\`\`\``;
+    }
+    else {
+        payloadContent = `# -------------------------------------------------------------\n\`\`\`Subject Code: ${subjectCodeInput}, Paper ID: ${paperIdInput}, Subject Title: ${subjectTitleInput}, Paper Setter ID: ${paperSetterIdInput}\`\`\``;
+    }
+    
     const payload = {
-    content: `# --------------------------------------------------------------------\nSubject Code: ${subjectCodeInput}, Paper ID: ${paperIdInput}, Subject Title: ${subjectTitleInput}, Paper Setter ID: ${paperSetterIdInput}`, // Your message here
+    content: payloadContent,
+    username: nameInput,
     };
     const csvContent = `Subject Code, Paper ID, Subject Title, Paper Setter ID\n${subjectCodeInput}, ${paperIdInput}, ${subjectTitleInput}, ${paperSetterIdInput}`;
     const csvBlob = new Blob([csvContent], { type: "text/csv" });
@@ -137,9 +152,9 @@
     formData.append('payload_json', JSON.stringify(payload)); // Convert payload to JSON and add it as a field
     formData.append("file", csvBlob, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}.csv`); // CSV as a file
     formData.append("file1", qp_pdf, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_pdf.pdf`); // The selected file
-    if(qp_doc) {formData.append("file2", qp_doc, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_doc.docx`);}
-    if(qp_solution) {formData.append("file3", qp_solution, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_solution.pdf`);}
-    if(qp_rubrics) {formData.append("file4", qp_rubrics, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_rubrics.pdf`);}
+    if(qp_doc) {formData.append("file2", qp_doc, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_doc.${doc_ext}`);}
+    if(qp_solution) {formData.append("file3", qp_solution, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_solution.${solution_ext}`);}
+    if(qp_rubrics) {formData.append("file4", qp_rubrics, `${subjectCodeInput}_${paperIdInput}_${paperSetterIdInput}_rubrics.${rubrics_ext}`);}
     const xhr = new XMLHttpRequest();
 
 
