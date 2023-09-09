@@ -144,7 +144,7 @@
     content: payloadContent,
     username: nameInput,
     };
-    const csvContent = `Subject Code, Paper ID, Subject Title, Paper Setter ID\n${subjectCodeInput}, ${paperIdInput}, ${subjectTitleInput}, ${paperSetterIdInput}`;
+    const csvContent = `${subjectCodeInput}, ${paperIdInput}, ${subjectTitleInput}, ${paperSetterIdInput}`;
     const csvBlob = new Blob([csvContent], { type: "text/csv" });
 
     // Create a FormData object and append both the CSV Blob and the selected file
