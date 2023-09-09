@@ -131,6 +131,18 @@
             alert("File size should be less than 25 MB.");
             return;
         }
+        if (qp_doc.size > 25 * 1024 * 1024) {
+            alert("File size should be less than 25 MB.");
+            return;
+        }
+        if (qp_solution.size > 25 * 1024 * 1024) {
+            alert("File size should be less than 25 MB.");
+            return;
+        }
+        if (qp_rubrics.size > 25 * 1024 * 1024) {
+            alert("File size should be less than 25 MB.");
+            return;
+        }
 //!----------------------------------------------------------------------------------------------
     payloadContent = " "
     if (remarks) {
