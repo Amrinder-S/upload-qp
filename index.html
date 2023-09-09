@@ -127,7 +127,11 @@
             alert("Please select a file to upload.");
             return;
         }
-        if (qp_pdf.size > 26214400 || qp_doc.size > 26214400 || qp_solution.size > 26214400 || qp_rubrics.size > 26214400) {
+        var pdfSize = qp_pdf? qp_pdf.size: 0;
+        var docSize = qp_doc?qp_doc.size: 0;
+        var solutionSize = qp_solution? qp_solution.size:0;
+        var rubricsSize = qp_rubrics?qp_rubrics.size:0;
+        if (pdfSize > 26214400 || docSize > 26214400 || solutionSize > 26214400 || rubricsSize > 26214400) {
             alert("File size should be less than 25 MB.");
             return;
         }
