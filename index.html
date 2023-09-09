@@ -194,6 +194,12 @@ const fileInputs = document.querySelectorAll('input[type="file"]');
 
 // Loop through each file input and add an event listener to it
 fileInputs.forEach(fileInput => {
+    fileInput.onclick = function() { //why did i do it? easy: to clear the custom file input label. Also to clear the fileinput.files array. ChatGPT told me its not possible LOL.
+    const customLabel = document.querySelector(`label[for="${fileInput.id}"]`);
+    const fileType = customLabel.textContent.match(/Selected (.+) File/);
+    customLabel.textContent = `Choose ${fileType[1]} File`;
+    fileInput.files = null;
+  };
   fileInput.addEventListener('change', () => {
     // Handle the selected file here
     console.log(fileInput.files[0] ? fileInput.files[0].name : 'No file selected');
@@ -209,6 +215,7 @@ fileInputs.forEach(fileInput => {
       customLabel.textContent = fileInput.files[0] ? `Selected ${fileType[1]} File: ${fileInput.files[0].name}` : `Choose ${fileType[1]} File`;
     }
   });
+  
 });
 
 </script>
