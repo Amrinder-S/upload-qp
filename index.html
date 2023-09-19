@@ -167,9 +167,11 @@
             if (xhr.status === 200) {
                 // Successful request
                 console.log("Response:", xhr.responseText);
+		alert("Upload Successful")
             } else {
                 // Error occurred
                 console.error("Request failed with code:", xhr.status);
+		alert("There was an error while uploading. check your Internet connection/reload page or try uploading again.")
             }
             document.getElementById("progressContainer").style.display = "none";
         }
