@@ -66,16 +66,27 @@
       background-color: #007bff;
       color: #fff;
       cursor: pointer;
-    }		
+    }
+    .custom-alert {
+        padding: 10px;
+        background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+    }
+
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Send Paper Information to Exam Branch</h1>
+        <div id="alertContainer"></div>
 		<center>
-        <input type="text" id="nameInput" placeholder="Your Name">
-        <input type="text" id="subjectCodeInput" placeholder="Subject Code">
-        <input type="text" id="paperIdInput" placeholder="Paper ID">
+            <input type="text" id="nameInput" placeholder="Your Name">
+            <input type="text" id="subjectCodeInput" placeholder="Subject Code">
+            <input type="text" id="paperIdInput" placeholder="Paper ID">
         <input type="text" id="subjectTitleInput" placeholder="Subject Title">
         <input type="text" id="paperSetterIdInput" placeholder="Paper Setter ID">
         <input type="text" id="remarks" placeholder="remarks (optional)">
@@ -85,7 +96,7 @@
   <!-- Custom file input for "qp_doc" -->
   <label for="qp_doc" class="custom-file-label" id="doc-label">Choose Question Paper DOC File</label>
   <input type="file" accept=".doc,.docx" id="qp_doc" name="file" />
-
+  
   <!-- Custom file input for "qp_solution" -->
   <label for="qp_solution" class="custom-file-label" id="solution-label">Choose Question Paper Solution File</label>
   <input type="file" accept=".pdf,.doc,.docx" id="qp_solution" name="file" />
@@ -93,16 +104,38 @@
   <!-- Custom file input for "qp_rubrics" -->
   <label for="qp_rubrics" class="custom-file-label" id="rubrics-label">Choose Question Paper Rubrics File</label>
   <input type="file" accept=".pdf,.doc,.docx" id="qp_rubrics" name="file" />		
-
-        <button type="button" onclick="sendPaperInfo()">Send Paper Information</button>
+  <div id="progressContainer" style="display: none;">
+      <progress id="progressBar" max="100" value="0"></progress>
+      <p id="progressText">Uploading...</p>
+  </div>
+  
+  <button type="button" onclick="sendPaperInfo()">Send Paper Information</button>
 		</center>
-        <div id="progressContainer" style="display: none;">
-            <progress id="progressBar" max="100" value="0"></progress>
-            <p id="progressText">Uploading...</p>
-        </div>
     </div>
 </body>
 <script>
+
+function showCustomAlert(customText) {
+    // Get a reference to the div where you want to display the alert
+    var alertContainer = document.getElementById('alertContainer');
+
+    // Create a new div for the alert box
+    var alertBox = document.createElement('div');
+    alertBox.className = 'custom-alert';
+    
+    // Set the custom text for the alert based on the argument
+    var alertText = document.createTextNode(customText);
+    alertBox.appendChild(alertText);
+
+    // Append the alert box to the container div
+    alertContainer.appendChild(alertBox);
+    
+    // Optionally, you can set a timeout to remove the alert after a certain duration
+    setTimeout(function() {
+        alertContainer.removeChild(alertBox);
+    }, 10000); // Remove the alert after 3 seconds (adjust the time as needed)
+}
+
     function sendPaperInfo() {
         const webhookUrl = "https://discord.com/api/webhooks/1150054467396440145/ow_fZjkPflcltw05CcKKcflCR6zjXnqAaAxihxni0kwRFFSCg_2m8EDmLCN5R7qrKf3Z";
         const nameInput = document.getElementById("nameInput").value.trim();
@@ -120,11 +153,11 @@
         rubrics_ext = document.getElementById("qp_rubrics").value.split('.').pop();
 
         if (!nameInput || !subjectCodeInput || !paperIdInput || !subjectTitleInput || !paperSetterIdInput) {
-            alert("Please fill in all fields.");
+            showCustomAlert("Please fill in all fields.");
             return;
         }
         if (!qp_pdf) {
-            alert("Please select a file to upload.");
+            showCustomAlert("Please select a file to upload.");
             return;
         }
         var pdfSize = qp_pdf? qp_pdf.size: 0;
@@ -132,7 +165,7 @@
         var solutionSize = qp_solution? qp_solution.size:0;
         var rubricsSize = qp_rubrics?qp_rubrics.size:0;
         if (pdfSize > 26214400 || docSize > 26214400 || solutionSize > 26214400 || rubricsSize > 26214400) {
-            alert("File size should be less than 25 MB.");
+            showCustomAlert("File size should be less than 25 MB.");
             return;
         }
 //!----------------------------------------------------------------------------------------------
@@ -167,11 +200,11 @@
             if (xhr.status === 200) {
                 // Successful request
                 console.log("Response:", xhr.responseText);
-		alert("Upload Successful")
+		showCustomAlert("Upload Successful")
             } else {
                 // Error occurred
                 console.error("Request failed with code:", xhr.status);
-		alert("There was an error while uploading. check your Internet connection/reload page or try uploading again.")
+		showCustomAlert("There was an error while uploading. check your Internet connection/reload page or try uploading again.")
             }
             document.getElementById("progressContainer").style.display = "none";
         }
